@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N-Queens Solver</title>
+</head>
+<body>
+
+<script>
+const squareSize = 40;
+let canvas = document.createElement("canvas");
+document.body.appendChild(canvas);
+let ctx = canvas.getContext("2d");
+
+function takeInput() {
+    let n;
+    while (true) {
+        try {
+            n = parseInt(prompt("Input size of chessboard? n ="));
+
+            if (n <= 3 || isNaN(n)) {
+                alert("Enter a value greater than or equal to 4");
+                continue;
+            }
+
+            return n;
+        } catch (e) {
+            alert("Invalid value entered. Enter again");
+        }
+    }
+}
+
+function getBoard(n) {
+    return Array.from({ length: n }, () => Array(n).fill('x'));
+}
+
+function printSolution(solutions, n) {
+    const x = Math.floor(Math.random() * solutions.length);
+    const solution = solutions[x];
+
+    for (const row of solution) {
+        console.log(row.join(' '));
+    }
+}
+
+function solve(board, col, n, solutions) {
+    if (col >= n) {
+        return;
+    }
+
+    for (let i = 0; i < n; ++i) {
+        if (isSafe(board, i, col, n)) {
+            board[i][col] = 'Q';
+            if (col === n - 1) {
+                addSolution(board, solutions);
+                board[i][col] = 'x';
+                return;
+            }
+            solve(board, col + 1, n, solutions);
+            board[i][col] = 'x';
+        }
+    }
+}
+
+function isSafe(board, row, col, n) {
+    for (let j = 0; j < col; ++j) {
+        if (board[row][j] === 'Q') {
+            return false;
+        }
+    }
+
+    let i = row, j = col;
+    while (i >= 0 && j >= 0) {
+        if (board[i][j] === 'Q') {
+            return false;
+        }
+        --i;
+        --j;
+    }
+
+    let x = row, y = col;
+    while (x < n && y >= 0) {
+        if (board[x][y] === 'Q') {
+            return false;
+        }
+        ++x;
+        --y;
+    }
+
+    return true;
+}
+
+function addSolution(board, solutions) {
+    solutions.push(board.map(row => [...row]));
+}
+
+function displaySolutionGUI(solutions, n) {
+    canvas.width = n * squareSize;
+    canvas.height = n * squareSize;
+
+    for (let i = 0; i < n; ++i) {
+        for (let j = 0; j < n; ++j) {
+            ctx.fillStyle = (i + j) % 2 === 0 ? '#fff' : '#000';
+            ctx.fillRect(j * squareSize, i * squareSize, squareSize, squareSize);
+
+            if (solutions[0][i][j] === 'Q') {
+                ctx.font = "20px Arial";
+                ctx.fillStyle = '#f00';
+                ctx.fillText("Q", j * squareSize + 10, i * squareSize + 25);
+            }
+        }
+    }
+}
+
+// Main execution
+const n = takeInput();
+const board = getBoard(n);
+const solutions = [];
+
+solve(board, 0, n, solutions);
+
+console.log("One of the solutions is:");
+printSolution(solutions, n);
+console.log("Total number of solutions =", solutions.length);
+
+displaySolutionGUI(solutions, n);
+</script>
+
+</body>
+</html>
